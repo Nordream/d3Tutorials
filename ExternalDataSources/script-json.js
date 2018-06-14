@@ -1,5 +1,5 @@
 (function () {
-    "use strict"
+    "use strict";
     var h = 100;
     var w = 400;
     var ds; //global var for data
