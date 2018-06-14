@@ -2,12 +2,9 @@
     "use strict"
     var h = 100;
     var w = 400;
-    var ds; //global var for data
-    var salesTotal = 0.0;
-    var salesAvg = 0.0;
-    var metrics = [];
+    // var ds; //global var for data
 
-    function BuildLine() {
+    function BuildLine(ds) {
         var lineChart = d3.line()
             .x(function (d) { return (d.month - 20130001) / 3.25; })
             .y(function (d) { return h - d.sales; });
@@ -18,44 +15,33 @@
             .attr('height', h);
 
         var vis = svg.append('path')
-            .attr('d', lineChart(ds))
+            .attr('d', lineChart(ds.monthlySales))
             .attr('stroke', 'purple')
             .attr('stroke-width', 3)
             .attr('fill', 'none');
     }
 
-    function ShowTotals() {
-        var t = d3.select('body').append('table');
-
-        for (var i = 0; i < ds.length; i++) {
-            salesTotal += ds[i]['sales'] * 1;
-        }
-
-        salesAvg = salesTotal / ds.length;
-
-        // add metrics to array
-        metrics.push('Sales Total: ' + salesTotal);
-        metrics.push('Sales Avg: ' + salesAvg.toFixed(2));
-
-
-        // add total to table
-        var tr = t.selectAll('tr')
-            .data(metrics)
-            .enter()
-            .append('tr')
-            .append('td')
-            .text(function(d){return d;});
+    function ShowHeader(ds) {
+        d3.select('body')
+            .append('h1')
+            .text(ds.category + ' Sales (2013)')
     }
 
-    d3.csv('MonthlySales.csv', function (error, data) {
+    d3.json('MonthlySalesbyCategoryMultiple.json', function (error, data) {
         if (error) {
             console.log(error);
         } else {
             console.log(data);
-            ds = data;
+           // ds = data;
         }
 
-        BuildLine();
-        ShowTotals();
-    })
+        data.contents.forEach(function (ds) {
+            console.log(ds);
+            ShowHeader(ds);
+            BuildLine(ds);
+        });
+
+        // ShowHeader();
+        // BuildLine();
+    });
 })();
