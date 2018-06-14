@@ -1,4 +1,3 @@
-
 (function () {
 
     var w = 350;
