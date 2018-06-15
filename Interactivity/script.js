@@ -114,6 +114,9 @@
 
 		// Drawing the Line
 		var viz = svg.selectAll("#path-" + ds.category)
+			.transition()
+			.duration(3000)
+			.ease(d3.easeBounce)
 			.attr('d', lineFun(ds.monthlySales));
 	}
 
