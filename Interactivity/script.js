@@ -28,6 +28,12 @@
 		let minDate = GetDate(ds.monthlySales[0]['month']);
 		let maxDate = GetDate(ds.monthlySales[(ds.monthlySales.length - 1)]['month']);
 
+		// Tooltip
+		var tooltip = d3.select('body')
+			.append('div')
+			.attr('class', "tooltip")
+			.style('opacity', 0);
+
 		// Scales
 		var xScale = d3.scaleTime()
 			.domain([minDate, maxDate])
@@ -72,6 +78,30 @@
 				"fill": "none",
 				"id": "path-" + ds.category
 			});
+
+		var dots = svg.selectAll('circle')
+			.data(ds.monthlySales)
+			.enter()
+			.append('circle')
+			.attr('cx', (d) => xScale(GetDate(d.month)))
+			.attr('cy', (d) => yScale(d.sales))
+			.attr('r', 5)
+			.attr('fill', '#666666')
+			.attr('class', 'circle-' + ds.category)
+		.on('mouseover', function (d) {
+			tooltip.transition()
+				.duration(500)
+				.style('opacity', .85);
+			tooltip.html('<strong>Sales $' + d.sales + "K</strong>")
+				.style('left', (d3.event.pageX) + 'px')
+				.style('top', (d3.event.pageY - 28) + 'px');
+		})
+		.on('mouseout', function(d){
+			tooltip.transition()
+			.duration(300)
+			.style('opacity', 0);
+		});
+
 	}
 
 	function updateLine(ds) {
