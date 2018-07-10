@@ -1,12 +1,12 @@
 (function () {
 	"use strict";
 
-	let w = 700;
-	let h = 700;
+	let w = 1000;
+	let h = 1000;
 
-	var projection = d3.geoAlbersUsa()
-	.translate([w/2, h/2])
-	.scale(500);
+	var projection = d3.geoMercator()
+	//.translate([w/2, h/2])
+	.scale(200);
 
 	let path = d3.geoPath().projection(projection);
 
@@ -20,7 +20,7 @@
 			0, d3.max(data, (d) => d.sales)
 		]);
 
-		d3.json('us.json', function (json) {
+		d3.json('countries.json', function (json) {
 
 			for (let i = 0; i < data.length; i++) {
 				let salesState = data[i].state;

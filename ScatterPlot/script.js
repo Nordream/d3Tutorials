@@ -46,7 +46,7 @@
         .append('circle')
         .attr('cx', function (d) { return d.month * 3; })
         .attr('cy', function (d) { return h - d.sales; })
-        .attr('r', 5)
+        .attr('r', (d)=> d.sales / 10)
         .attr('fill', function (d) { return salesKPI(d.sales); });
 
     var lables = svg.selectAll('text')

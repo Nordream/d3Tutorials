@@ -1,0 +1,47 @@
+<!-- https://jsfiddle.net/9y2g65qc/ -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<title>Document</title>
+	<style>
+
+		body {
+		  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+		  margin: auto;
+		  position: relative;
+		  width: 960px;
+		}
+		
+		text {
+		  font: 10px sans-serif;
+		}
+		
+		.axis path,
+		.axis line {
+		  fill: none;
+		  stroke: #000;
+		  shape-rendering: crispEdges;
+		}
+		
+		form {
+		  position: absolute;
+		  right: 10px;
+		  top: 10px;
+		}
+		
+		</style>
+</head>
+<body>
+	<form>
+		<label><input type="radio" name="mode" value="grouped"> Grouped</label>
+		<label><input type="radio" name="mode" value="stacked" checked> Stacked</label>
+	  </form>
+	  <script src="//d3js.org/d3.v3.min.js"></script>
+	  <script src="script.js"></script>
+</body>
+</html>
