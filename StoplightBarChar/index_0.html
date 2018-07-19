@@ -40,150 +40,220 @@
 
 	<script>
 
-		var data =
+		 var data =
 			[
 				{
-					Name: "PRI-1",
-					Risks:
+				    Name: "1",
+				    Risks:
 						[
-							{ Category: "Transaction", Weight: 13 },
-							{ Category: "Counterparty", Weight: 15 },
-							{ Category: "Object Provenance", Weight: 7 },
-							{ Category: "Object Physicality", Weight: 9 }
+							{ Category: "Transaction", Weight: 8 },
+							{ Category: "Counterparty", Weight: 9 },
+							{ Category: "Object", Weight: 13 }
 						]
+
 				},
 				{
-					Name: "PRI-2",
-					Risks:
+				    Name: "0",
+				    Risks:
 						[
-							{ Category: "Transaction", Weight: 14 },
-							{ Category: "Counterparty", Weight: 17 },
-							{ Category: "Object Provenance", Weight: 4 },
-							{ Category: "Object Physicality", Weight: 5 }
+							{ Category: "Transaction", Weight: 11 },
+							{ Category: "Counterparty", Weight:12 },
+							{ Category: "Object", Weight: 6 }
 						]
-				},
-				{
-					Name: "PRI-3",
-					Risks:
-						[
-							{ Category: "Transaction", Weight: 9 },
-							{ Category: "Counterparty", Weight: 6 },
-							{ Category: "Object Provenance", Weight: 3 },
-							{ Category: "Object Physicality", Weight: 13 }
-						]
+
 				}
 			];
 
-		var UNIT_LABEL_WIDTH = 110;
-		var UNIT_LABEL_HEIGHT = 40;
-		var GUTTER_WIDTH = 25;
+        var margins = {
+            left: 100,
+            bottom: 25,
+            top: 50
+        };
 
-		var margins = {
-			left: UNIT_LABEL_WIDTH,
-			bottom: UNIT_LABEL_HEIGHT,
-			right: GUTTER_WIDTH
-		};
+        var minContainerWidth = 380;
 
-		var sizes = {
-			width: 700,
-			height: 400
-		};
+        var svgContainer = d3.select('#riskStackedChart');
 
-		var width = sizes.width - margins.left - margins.right;
-		var height = sizes.height - margins.bottom;
+        svgContainer.select('svg').remove();
+        svgContainer.select('#chartTitle').remove();
 
-		var series = data.map((d) => d.Name);
+        var containerWidth = parseInt(svgContainer.style('width'));
 
-		var dataset = data.map(function (d) {
-			return d.Risks.map(function (o, i) {
-				// Structure it so that your numeric axis (the stacked amount) is y
-				return {
-					y: o.Weight,
-					x: o.Category
-				};
-			});
-		});
-		console.log(dataset);
+        var size = (containerWidth < minContainerWidth) ?
+            minContainerWidth : containerWidth
+        var width = size - margins.left;
+        var height = size - margins.bottom - margins.top;
 
-		d3.layout.stack()(dataset);
-		console.log(dataset);
+        var series = data.map(function (d) {
+            return d.Name;
+        });
 
-		var dataset = dataset.map(function (group) {
-			return group.map(function (d) {
-				// Invert the x and y values, and y0 becomes x0
-				return {
-					x: d.y,
-					y: d.x,
-					x0: d.y0
-				};
-			});
-		});
+        var dataset = data.map(function (d) {
+            return d.Risks.map(function (o, i) {
+                // Structure it so that your numeric axis (the stacked amount) is y
+                return {
+                    y: o.Weight,
+                    x: o.Category
+                };
+            });
+        });
 
-		var svg = d3.select('#myChart')
-			.append('svg')
-			.attr('width', width + margins.left + margins.right)
-			.attr('height', height + margins.bottom)
-			.append('g')
-			.attr('transform', 'translate(' + margins.left + ', 0)');
+        d3.layout.stack()(dataset);
 
-		var units = dataset[0].map((d) => d.y);
+        var dataset = dataset.map(function (group) {
+            return group.map(function (d) {
+                // Invert the x and y values, and y0 becomes x0
+                return {
+                    x: d.y,
+                    y: d.x,
+                    x0: d.y0
+                };
+            });
+        });
 
-		var yScale = d3.scale.ordinal()
-			.domain(units)
-			.rangeRoundBands([0, height], .1);
+        var tip = d3.tip()
+           .attr('class', 'd3-tip')
+           .offset([-10, 0])
+           .html(function (d) {
+               return "<strong>Name:</strong> <span class='details'>" + data.Category + "</span>"
+                      + "<br>" + "<strong>Total risk score:</strong> <span class='details'>" + dataset.Weight + "</span>";
+           });
 
-		var yAxis = d3.svg.axis()
-			.scale(yScale)
-			.orient('left');
+        var svg = svgContainer
+            .append('svg')
+            .attr('width', width + margins.left)
+            .attr('height', height + margins.bottom + margins.top)
+            .attr('style', 'display: flex; flex-direction: column; justify-content: center;')
+            .append('g')
+            .attr('transform', 'translate(' + margins.left + ',' + margins.top + ')');
 
-		var xMax = d3.max(dataset, function (group) {
-			var groupMax = d3.max(group, (d) => d.x + d.x0);
-			return groupMax;
-		});
 
-		var xScale = d3.scale.linear()
-			.domain([0, xMax])
-			.range([0, width]);
 
-		var xAxis = d3.svg.axis()
-			.scale(xScale)
-			.orient('bottom')
-			.innerTickSize(-height)
+        svg.append("text")
+            .attr("x", (width / 2) - 50)
+            .attr("y", 0 - (margins.top / 2))
+            .attr("text-anchor", "middle")
+            .style("font-size", "24px")
+            .text("Stoplight Chart")
+
+        svg.call(tip);
+
+
+        var units = dataset[0].map(function (d) {
+            return d.y;
+        });
+
+        var yScale = d3.scale.ordinal()
+            .domain(units)
+            .rangeRoundBands([0, height - 130], .1);
+
+        var yAxis = d3.svg.axis()
+            .scale(yScale)
+            .orient('left');
+
+        var xMax = d3.max(dataset, function (group) {
+            var groupMax = d3.max(group, function (d) {
+                return d.x + d.x0;
+            });
+            return groupMax;
+        });
+
+        var xScale = d3.scale.linear()
+            .domain([0, xMax])
+            .range([0, width])
+            .nice();
+
+        var xAxis = d3.svg.axis()
+            .scale(xScale)
+            .orient('bottom')
+            .ticks(5)
+			.innerTickSize(0 - (height - margins.top * 2))
 			.outerTickSize(0)
-			.tickPadding(10);
+			.tickPadding(30);
 
-		var colors = function (i) {
-			if (i == 0) return '#30A7D6';
-			if (i == 1) return '#16557F';
-			if (i == 2) return 'red';
-		};
+        var colors = function (i) {
+            if (i == 0) return '#2ECC71';
+            if (i == 1) return '#F4D03F';
+            if (i == 2) return '#E74C3C';
+        };
 
-		var groups = svg.selectAll('g')
-			.data(dataset)
-			.enter()
-			.append('g')
-			.style('fill', (d, i) => colors(i));
+        var groups = svg.selectAll('g')
+            .data(dataset)
+            .enter()
+            .append('g')
+            .style('fill', (d, i) => colors(i));
 
-		groups.selectAll('rect')
-			.data(function (d) { return d; })
-			.enter()
-			.append('rect')
-			.attr('x', (d) => xScale(d.x0))
-			.attr('y', (d, i) => yScale(d.y))
-			.attr('height', (d) => yScale.rangeBand())
-			.attr('width', (d) => xScale(d.x));
 
-		svg.append('g')
-			.attr('class', 'bc-x-axis bc-axis')
-			.attr('transform', 'translate(0,' + height + ')')
-			.call(xAxis);
 
-		svg.append('g')
-			.attr('class', 'bc-y-axis bc-axis')
-			.call(yAxis);
+        groups.selectAll('rect')
+            .data((d) => d)
+            .enter()
+            .append('rect')
+            .attr('x', (d) => xScale(d.x0))
+            .attr('y', (d) => yScale(d.y))
+            .attr('height', (d) => yScale.rangeBand())
+            .attr('width', (d) => xScale(d.x))
+            .on("mouseover", tip.show)
+            .on('mouseout', tip.hide);
+
+        svg.append('g')
+            .attr('class', 'bc-x-axis bc-axis')
+            .attr('transform', 'translate(0,' + (height - 100) + ')')
+            .call(xAxis);
+
+        svg.append('g')
+            .attr('class', 'bc-y-axis bc-axis')
+            .call(yAxis);
+
+        svg.select('.domain').remove();
 
         //TODO: Legend
+
+        var legendHeight = 30,
+         legendMarginRectToText = 3,
+         legendRectangleSize = 10;
+
+
+        var dataL = 0;
+        var offset = 50;
+
+        var legendTable = svg.append("g")
+            .attr("transform", "translate(0, " + + ")")
+            .attr("class", "legendTable");
+
+        var legend = legendTable.selectAll(".legend")
+            .data(data)
+            .enter().append("g")
+            .attr("class", "legend")
+            .attr("transform", function (d, i) {
+                if (i === 0) {
+                    dataL = 50 + offset
+                    return "translate(0,0)"
+                } else {
+                    var newdataL = dataL
+                    dataL += 10 + offset
+                    return "translate(0" + (newdataL) + ")"
+                }
+            })
+
+        legend.append("rect")
+            .attr("x", width / 3 + legendMarginRectToText)
+            .attr("y", height - legendHeight)
+            .attr("width", legendRectangleSize)
+            .attr("height", legendRectangleSize)
+            .style("fill", (d, i) => colors(i));
+
+        legend.append("text")
+            .attr("x", width / 3)
+            .attr("y", height - legendHeight + legendMarginRectToText)
+            .attr("dy", ".35em")
+            .style("text-anchor", "end")
+            .text((d, i) => series[i]);
+
+
         //TODO: Tooltips
+
+
 
 	</script>
 </body>
